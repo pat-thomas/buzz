@@ -1,5 +1,6 @@
 (ns buzz.events
-  (:require [clojure.core.typed :as t]))
+  (:require [clojure.core.typed :as t]
+            [buzz.sounds :as sounds]))
 
 (def registry (atom {}))
 
@@ -18,7 +19,14 @@
   [a b]
   (+ a b))
 
+(defhandler kick
+  [_]
+  (sounds/kick))
+
+(defhandler hat
+  [_]
+  (sounds/hat))
+
 (defhandler default
   [payload]
-  (def payload payload)
   (println "received payload:" payload))

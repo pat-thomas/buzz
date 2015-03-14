@@ -1,6 +1,6 @@
 (ns buzz.scratch
   (:require [clojure.core.typed :as t]
-            [clojure.core.async :as async]))
+            [clojure.core.async :as async :refer [go chan <! >! <!! >!!]]))
 
 (def timeout-randomness-val 500)
 
@@ -69,3 +69,32 @@
         (println (async/<! ch))))
     :done)
   )
+
+
+
+(comment
+  (let [ch (async/chan)]
+    (async/go
+      (Thread/sleep (rand-int 400))
+      (async/>! ch :foof))
+    (async/<!! (async/alt!! ch (async/timeout 400))))
+  )
+
+
+(comment
+  (let [ch (chan)]
+    (>!! ch :foof)
+    (<!! ch))
+  )
+
+
+(comment
+  (def fbc (chan 1))
+  (go (>! fbc 1)
+      (println "done 1")
+      (>! fbc 2)
+      (println "done 2"))
+  (<!! fbc)
+  (<!! (async/timeout 1000))
+  )
+
