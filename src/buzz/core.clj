@@ -4,18 +4,20 @@
             [clojure.core.async :as async :refer [go go-loop chan <! >! alts! timeout]]))
 
 (def stop (atom false))
-(def timeout-value 500)
+(def timeout-value 1000)
 (def event-batch-chan (chan 1))
 (def event-chan (chan 100))
 
 (defn start-event-consumer
   []
   (go
-    (while true
+    (while (not @stop)
       (if-let [evt (<! event-chan)]
         (when-let [impl (-> evt :evt-name events/lookup-handler)]
           (impl (:data evt)))
-        (println "waiting...")))))
+        (println "waiting..."))
+      (<! (timeout (rand-nth [(/ timeout-value 4.0)
+                              (/ timeout-value 8.0)]))))))
 
 (defn publish-event!
   [evt-name data]
@@ -50,7 +52,7 @@
   (reset! stop true)
   (reset! stop false)
   (main)
-  (dotimes [_ 50]
+  (dotimes [_ 100]
     (go
       (>! event-batch-chan
           [{:evt-name :kick :data {}}
