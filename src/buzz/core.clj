@@ -3,10 +3,11 @@
             [clojure.core.typed :as t]
             [clojure.core.async :as async :refer [go go-loop chan <! >! alts! timeout]]))
 
-(def stop (atom false))
-(def timeout-value 1000)
-(def event-batch-chan (chan 1))
-(def event-chan (chan 100))
+(do
+  (def stop (atom false))
+  (def timeout-value 800)
+  (def event-batch-chan (chan 1))
+  (def event-chan (chan)))
 
 (defn start-event-consumer
   []
@@ -16,8 +17,7 @@
         (when-let [impl (-> evt :evt-name events/lookup-handler)]
           (impl (:data evt)))
         (println "waiting..."))
-      (<! (timeout (rand-nth [(/ timeout-value 4.0)
-                              (/ timeout-value 8.0)]))))))
+      (<! (timeout (/ timeout-value 4.0))))))
 
 (defn publish-event!
   [evt-name data]
@@ -49,15 +49,26 @@
   :main-running)
 
 (comment
-  (reset! stop true)
-  (reset! stop false)
-  (main)
+  (let [ch (chan)]
+    (go
+      (alts! ch (timeout 400))))
+  
+  (do
+    (reset! stop true)
+    (reset! stop false)
+    (main))
   (dotimes [_ 100]
     (go
       (>! event-batch-chan
           [{:evt-name :kick :data {}}
            {:evt-name :hat :data {}}])))
+  (go
+    (>! event-batch-chan
+        [{:evt-name :kick :data {}}
+         {:evt-name :kick-splay :data {}}
+         {:evt-name :hat :data {}}]))
   )
 
-;; always type check on compile
-;;(t/check-ns)
+
+;;(async/merge)
+

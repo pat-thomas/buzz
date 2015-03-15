@@ -1,6 +1,7 @@
 (ns buzz.events
   (:require [clojure.core.typed :as t]
-            [buzz.sounds :as sounds]))
+            [clojure.core.async :as async :refer [go go-loop chan <! >! alts! timeout]]
+            [buzz.sounds        :as sounds]))
 
 (def registry (atom {}))
 
@@ -15,13 +16,16 @@
        ~@body)
      (swap! registry assoc ~(keyword fn-name) ~fn-name)))
 
-(defhandler foo
-  [a b]
-  (+ a b))
-
 (defhandler kick
   [_]
   (sounds/kick))
+
+(defhandler kick-splay
+  [& _]
+  (go
+    (dotimes [_ 4]
+      (sounds/kick)
+      (Thread/sleep (rand-int 20)))))
 
 (defhandler hat
   [_]
