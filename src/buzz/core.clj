@@ -1,7 +1,7 @@
 (ns buzz.core
   (:require [buzz.events        :as events]
             [clojure.core.typed :as t]
-            [clojure.core.async :as async :refer [go go-loop chan <! >! alts! timeout]]))
+            [clojure.core.async :as async :refer [>! <! >!! <!! go chan buffer close! thread alts! alts!! timeout]]))
 
 (do
   (def stop (atom false))
