@@ -2,12 +2,12 @@
   (:require [clojure.core.async :as async :refer [alts! go chan <! >! <!! >!! timeout]]))
 
 (defn timed-async-loop
-  [wait input-ch]
+  [wait input-ch handler]
   (let [ch (chan)]
     (go
       (while true
         (<! (timeout wait))
-        (println (<! ch))))
+        (handler (<! ch))))
     (go
       (while true
         (<! (timeout wait))
