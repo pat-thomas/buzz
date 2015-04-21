@@ -1,8 +1,5 @@
-(ns buzz.scratch
-  (:require [clojure.core.typed :as t]
-            [clojure.core.async :as async :refer [alts! go chan <! >! <!! >!! timeout]]))
-
-(def stop (atom false))
+(ns buzz.loop
+  (:require [clojure.core.async :as async :refer [alts! go chan <! >! <!! >!! timeout]]))
 
 (defn timed-async-loop
   [wait input-ch]
